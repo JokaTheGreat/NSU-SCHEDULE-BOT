@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 public class ScheduleBot extends TelegramLongPollingBot {
 
-    private Multimap<String, Lesson> schedule = null;
+    private static DataBase dataBase;
     private static List<List<InlineKeyboardButton>> daysList = null;
     private static final String GROUP_NUMBER_FORMAT = "[1-2]{1}[0-9]{4}(\\.[1-4])?";
 
@@ -64,7 +64,7 @@ public class ScheduleBot extends TelegramLongPollingBot {
         Message message = callbackQuery.getMessage();
         String day = callbackQuery.getData();
 
-        String response = Schedule.getFullSchedule(schedule, day);
+        String response = Schedule.getFullSchedule(dataBase.getUserSchedule(message.getChatId()), day);
         execute(
                 SendMessage.builder()
                         .chatId(message.getChatId().toString())
@@ -99,7 +99,8 @@ public class ScheduleBot extends TelegramLongPollingBot {
             else {
                 String groupNumber = message.getText();
                 if (isGroupNumberValid(groupNumber)) {
-                    schedule = ScheduleParser.parseGroupSchedule(groupNumber);
+                    Multimap<String, Lesson> schedule = ScheduleParser.parseGroupSchedule(groupNumber);
+                    dataBase.addUserSchedule(message.getChatId(), schedule);
                     if (schedule != null) {
                         execute(
                                 SendMessage.builder()
@@ -138,6 +139,7 @@ public class ScheduleBot extends TelegramLongPollingBot {
 
     public static void main(String[] args) throws Exception {
         initDaysList();
+        dataBase = new DataBase();
 
         ScheduleBot bot = new ScheduleBot(new DefaultBotOptions());
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
