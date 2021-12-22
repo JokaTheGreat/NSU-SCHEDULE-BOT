@@ -20,9 +20,10 @@ public class ScheduleBot extends TelegramLongPollingBot {
 
     private Multimap<String, Lesson> schedule = null;
     private static List<List<InlineKeyboardButton>> daysList = null;
+    private static final String GROUP_NUMBER_FORMAT = "[1-2]{1}[0-9]{4}(\\.[1-4])?";
 
-    private static final String TOKEN = "5076105079:AAEpt9sWk4vuWG5-HUy7LAGbZnSAzYt1Kb0";
-    private static final String USERNAME = "@nsuScheduleTestBot";
+    private static final String TOKEN = "";
+    private static final String USERNAME = "";
 
     public ScheduleBot(DefaultBotOptions options) {
         super(options);
@@ -79,6 +80,10 @@ public class ScheduleBot extends TelegramLongPollingBot {
                         .text("Incorrect group number, please try again!\n")
                         .build()
         );
+    }
+
+    private boolean isGroupNumberValid(String groupNumber) {
+        return Pattern.compile(GROUP_NUMBER_FORMAT).matcher(groupNumber).matches();
     }
 
     public void handleMessage(Message message) throws TelegramApiException {
