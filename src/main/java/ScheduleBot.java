@@ -1,17 +1,28 @@
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import com.google.common.collect.Multimap;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class ScheduleBot extends TelegramLongPollingBot {
-    private static final String TOKEN = "";
-    private static final String USERNAME = "";
+
+    private Multimap<String, Lesson> schedule = null;
+    private static List<List<InlineKeyboardButton>> daysList = null;
+
+    private static final String TOKEN = "5076105079:AAEpt9sWk4vuWG5-HUy7LAGbZnSAzYt1Kb0";
+    private static final String USERNAME = "@nsuScheduleTestBot";
 
     public ScheduleBot(DefaultBotOptions options) {
         super(options);
@@ -29,43 +40,100 @@ public class ScheduleBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage()) {
+        if (update.hasCallbackQuery()) {
             try {
-                handleMessage(update.getMessage());
-            } catch (Exception e) {
+                handleCallback(update.getCallbackQuery());
+            }
+            catch (TelegramApiException e) {
                 e.printStackTrace();
             }
         }
+        else if (update.hasMessage()) {
+            try {
+                handleMessage(update.getMessage());
+            }
+            catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
-    public void handleMessage(Message message) throws Exception {
+    private void handleCallback(CallbackQuery callbackQuery) throws TelegramApiException {
+        Message message = callbackQuery.getMessage();
+        String day = callbackQuery.getData();
+
+        String response = Schedule.getFullSchedule(schedule, day);
+        execute(
+                SendMessage.builder()
+                        .chatId(message.getChatId().toString())
+                        .text(response)
+                        .build()
+        );
+    }
+
+    private void sendTryAgainResponse(Message message) throws TelegramApiException {
+        execute(
+                SendMessage.builder()
+                        .chatId(message.getChatId().toString())
+                        .text("Incorrect group number, please try again!\n")
+                        .build()
+        );
+    }
+
+    public void handleMessage(Message message) throws TelegramApiException {
         if (message.hasText()) {
             if (message.getText().contains("/start")) {
                 execute(
                         SendMessage.builder()
                                 .chatId(message.getChatId().toString())
-                                .text("Hello i'm nsu schedule test bot! \nI'm very young \nPlease don't bully me!!")
+                                .text("Hello i'm nsu schedule test bot! \nPlease, write your group number!")
                                 .build()
                 );
             }
             else {
-                StringBuffer stringBuffer = new StringBuffer("All subjects for 19206:\n");
-                Document document = Jsoup.connect("https://table.nsu.ru/group/19206/").get();
-                Elements subjects = document.getElementsByAttributeValue("class", "subject");
-                subjects.forEach((subject) -> {
-                    stringBuffer.append(subject.text()).append("\n");
-                });
-                execute(
-                        SendMessage.builder()
+                String groupNumber = message.getText();
+                if (Pattern.compile("[1-2]{1}[0-9]{4}(\\.[1-4])?").matcher(groupNumber).matches()) {
+                    schedule = ScheduleParser.parseGroupSchedule(groupNumber);
+                    if (schedule != null) {
+                        execute(
+                                SendMessage.builder()
                                 .chatId(message.getChatId().toString())
-                                .text(stringBuffer.toString())
+                                .text("Choose day")
+                                .replyMarkup(InlineKeyboardMarkup.builder().keyboard(daysList).build())
                                 .build()
-                );
+                        );
+                    }
+                    else {
+                        sendTryAgainResponse(message);
+                    }
+                }
+                else {
+                    sendTryAgainResponse(message);
+                }
             }
         }
     }
 
+    private static void initDaysList() {
+        daysList = new ArrayList<>();
+        daysList.add(Arrays.asList(
+                InlineKeyboardButton.builder().text("Monday").callbackData("MO").build(),
+                InlineKeyboardButton.builder().text("Tuesday").callbackData("TU").build()
+        ));
+        daysList.add(Arrays.asList(
+                InlineKeyboardButton.builder().text("Wednesday").callbackData("WE").build(),
+                InlineKeyboardButton.builder().text("Thursday").callbackData("TH").build()
+        ));
+        daysList.add(Arrays.asList(
+                InlineKeyboardButton.builder().text("Friday").callbackData("FR").build(),
+                InlineKeyboardButton.builder().text("Saturday").callbackData("SA").build()
+        ));
+    }
+
     public static void main(String[] args) throws Exception {
+        initDaysList();
+
         ScheduleBot bot = new ScheduleBot(new DefaultBotOptions());
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         telegramBotsApi.registerBot(bot);
