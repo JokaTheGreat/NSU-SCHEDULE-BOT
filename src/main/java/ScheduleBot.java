@@ -98,7 +98,7 @@ public class ScheduleBot extends TelegramLongPollingBot {
             }
             else {
                 String groupNumber = message.getText();
-                if (Pattern.compile("[1-2]{1}[0-9]{4}(\\.[1-4])?").matcher(groupNumber).matches()) {
+                if (isGroupNumberValid(groupNumber)) {
                     schedule = ScheduleParser.parseGroupSchedule(groupNumber);
                     if (schedule != null) {
                         execute(
