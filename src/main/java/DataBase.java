@@ -1,19 +1,32 @@
-import com.google.common.collect.Multimap;
-
 import java.util.HashMap;
 
 public class DataBase {
-    private final HashMap<Long, Multimap<String, Lesson>> database;
+
+    private final HashMap<Long, User> database;
 
     public DataBase() {
         database = new HashMap<>();
     }
 
-    public Multimap<String, Lesson> getUserSchedule(Long chatId) {
-        return database.get(chatId);
+    public Schedule getUserSchedule(Long chatId) {
+        User user = database.get(chatId);
+        if (user == null) {
+            return null;
+        }
+
+        return user.getSchedule();
     }
 
-    public void addUserSchedule(Long chatId, Multimap<String, Lesson> schedule) {
-        database.put(chatId, schedule);
+    public String getGroupNumber(Long chatId) {
+        User user = database.get(chatId);
+        if (user == null) {
+            return null;
+        }
+
+        return user.getGroupNumber();
+    }
+
+    public void addUser(Long chatId, String groupNumber, Schedule schedule) {
+        database.put(chatId, new User(groupNumber, schedule));
     }
 }

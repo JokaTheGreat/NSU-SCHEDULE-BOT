@@ -4,39 +4,49 @@ import com.google.common.collect.Multimap;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ScheduleParser {
-    static String icsLine;
-    static BufferedReader icsReader;
-
     static final String TABLE_NSU_URL = "https://table.nsu.ru/ics/group/";
     static final String LESSON_BLOCK_START = "BEGIN:VEVENT";
     static final String LESSON_BLOCK_END = "END:VEVENT";
     static final String DIVIDER = ":";
 
-    public static Multimap<String, Lesson> parseGroupSchedule(String groupNumber) {
+    public static Schedule parseGroupSchedule(String groupNumber) {
         String groupScheduleURL = TABLE_NSU_URL + groupNumber;
 
         try {
+            BufferedReader icsReader;
             icsReader = new BufferedReader(new InputStreamReader(new URL(groupScheduleURL).openStream(), StandardCharsets.UTF_8));
             List<Lesson> lessons = new ArrayList<>();
 
+            String icsLine;
             while ((icsLine = icsReader.readLine()) != null) {
                 if (icsLine.equals(LESSON_BLOCK_START)) {
                     lessons.add(parseLessonBlock(icsReader));
                 }
             }
 
-            Multimap<String, Lesson> schedule = ArrayListMultimap.create();
+            Multimap<String, Lesson> lessonByDayMultimap = ArrayListMultimap.create();
+
+            List<String> daysList = new ArrayList<>();
 
             lessons.forEach(lesson -> {
-                schedule.put(lesson.getDay(), lesson);
+                var dayOfLesson = lesson.getDay();
+                lessonByDayMultimap.put(dayOfLesson, lesson);
+
+                if (!daysList.contains(dayOfLesson)) {
+                    daysList.add(dayOfLesson);
+                }
             });
-            return schedule;
+
+            Map<String, List<Lesson>> groupSchedule = new HashMap<>();
+
+            for (String day : daysList) {
+                List<Lesson> dayLessons = new ArrayList<>(lessonByDayMultimap.get(day));
+                groupSchedule.put(day, dayLessons);
+            }
+            return new Schedule(groupSchedule);
 
         }
         catch (IOException e) {

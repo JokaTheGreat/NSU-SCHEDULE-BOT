@@ -1,24 +1,36 @@
-import com.google.common.collect.Multimap;
+import java.util.List;
+import java.util.Map;
 
 public class Schedule {
     private static final String DASH = "========================================================";
 
-    public static String getFullSchedule(Multimap<String, Lesson> schedule, String day) {
+    Map<String, List<Lesson>> schedule;
+
+    public Schedule(Map<String, List<Lesson>> schedule) {
+        this.schedule = schedule;
+    }
+
+    public String getStringSchedule(String day) {
         StringBuffer stringBuffer = new StringBuffer("");
 
-        if (schedule != null) {
-            for (Lesson lesson : schedule.get(day)) {
-                stringBuffer.append(lesson.getTeacher()).append("\n");
-                stringBuffer.append(lesson.getSubject()).append("\n");
-                stringBuffer.append(lesson.getClassroom()).append("\n");
-                stringBuffer.append(lesson.getStartTime().toString()).append("\n");
-                stringBuffer.append(lesson.getEndTime().toString()).append("\n");
+        schedule.get(day).forEach(lesson -> {
+            stringBuffer.append(lesson.getTeacher()).append("\n");
+            stringBuffer.append(lesson.getSubject()).append("\n");
+            stringBuffer.append(lesson.getClassroom()).append("\n");
+            stringBuffer.append(lesson.getStartTime().toString()).append("\n");
+            stringBuffer.append(lesson.getEndTime().toString()).append("\n");
 
-                stringBuffer.append(DASH).append("\n");
-            }
-        } else {
-            stringBuffer.append("Sorry we got some problems").append("\n");
-        }
+            stringBuffer.append(DASH).append("\n");
+        });
+
         return stringBuffer.toString();
+    }
+
+    public List<Lesson> getListSchedule(String day) {
+        return schedule.get(day);
+    }
+
+    public void setSchedule(Map<String, List<Lesson>> schedule) {
+        this.schedule = schedule;
     }
 }
