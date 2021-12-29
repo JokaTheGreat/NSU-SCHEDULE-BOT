@@ -21,8 +21,8 @@ public class ScheduleBot extends TelegramLongPollingBot {
     private static Collection<KeyboardRow> editingMenu;
 
     private static final String GROUP_NUMBER_FORMAT = "[1-2][0-9]{4}(\\.[1-4])?";
-    private static final String TOKEN = "5076105079:AAEpt9sWk4vuWG5-HUy7LAGbZnSAzYt1Kb0";
-    private static final String USERNAME = "@nsuScheduleTestBot";
+    private static final String TOKEN = "";
+    private static final String USERNAME = "";
 
     public ScheduleBot(DefaultBotOptions options) {
         super(options);
@@ -82,7 +82,6 @@ public class ScheduleBot extends TelegramLongPollingBot {
     }
 
     private String getDayFromEdit(String editString) {
-        System.out.println(editString.indexOf("Edit") + 1 + "Edit".length());
         return editString.substring(editString.indexOf("Edit") + "Edit".length() + 1, editString.lastIndexOf(" "));
     }
 
@@ -181,14 +180,14 @@ public class ScheduleBot extends TelegramLongPollingBot {
                     Schedule schedule = ScheduleParser.parseGroupSchedule(userMessage);
                     if (schedule != null) {
                         dataBase.addUser(chatId, userMessage, schedule);
-                        sendTextResponse(message, "Group number correct!\nNow you can choose the day!");
+                        sendKeyboardResponse(message, "Group number correct!\nNow you can choose the day!", mainMenu);
                     }
                     else {
-                        sendTextResponse(message, "Invalid group number.\nPlease try again!");
+                        sendKeyboardResponse(message, "Invalid group number.\nPlease try again!", mainMenu);
                     }
                 }
                 else {
-                    sendTextResponse(message, "Invalid group number.\nPlease try again!");
+                    sendKeyboardResponse(message, "Invalid group number.\nPlease try again!", mainMenu);
                 }
             }
         }

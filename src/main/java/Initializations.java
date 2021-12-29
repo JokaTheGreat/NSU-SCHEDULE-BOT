@@ -1,6 +1,9 @@
+import org.checkerframework.checker.units.qual.K;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -59,10 +62,18 @@ public class Initializations {
         int firstRowNumber = lessons.size() / 2 + 1;
         int secondRowNumber = lessons.size();
         for (int i = 0; i < firstRowNumber; i++) {
-            firstRow.add(lessons.get(i).getSubject() + "[" + i + " " + day + "]");
+            String subject = lessons.get(i).getSubject();
+            if (subject.length() > 50) {
+                subject = subject.substring(0, 45);
+            }
+            firstRow.add(subject + " [" + i + " " + day + "]");
         }
         for (int i = firstRowNumber; i < secondRowNumber; i++) {
-            secondRow.add(lessons.get(i).getSubject() + "[" + i + " " + day + "]");
+            String subject = lessons.get(i).getSubject();
+            if (subject.length() > 50) {
+                subject = subject.substring(0, 45);
+            }
+            secondRow.add(subject + " [" + i + " " + day + "]");
         }
         secondRow.add("Main Menu");
 
