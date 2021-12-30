@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.HashMap;
 
@@ -7,7 +8,7 @@ enum Parity {
     even //2
 }
 
-public class Lesson {
+public class Lesson implements Serializable {
     private final String teacher;
     private final String subject;
     private final String classroom;

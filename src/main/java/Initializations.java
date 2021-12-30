@@ -1,13 +1,12 @@
-import org.checkerframework.checker.units.qual.K;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 public class Initializations {
+    private static final int MAX_MESSAGE_LENGTH = 50;
+
     public static Collection<KeyboardRow> initMainMenu() {
         List<KeyboardRow> daysList = new ArrayList<>();
         KeyboardRow firstRow = new KeyboardRow();
@@ -53,7 +52,7 @@ public class Initializations {
         KeyboardRow firstRow = new KeyboardRow();
         KeyboardRow secondRow = new KeyboardRow();
 
-        if (lessons == null) {
+        if (lessons.isEmpty()) {
             firstRow.add("Main Menu");
             lessonsToDelete.add(firstRow);
             return lessonsToDelete;
@@ -63,15 +62,15 @@ public class Initializations {
         int secondRowNumber = lessons.size();
         for (int i = 0; i < firstRowNumber; i++) {
             String subject = lessons.get(i).getSubject();
-            if (subject.length() > 50) {
-                subject = subject.substring(0, 45);
+            if (subject.length() > MAX_MESSAGE_LENGTH) {
+                subject = subject.substring(0, MAX_MESSAGE_LENGTH) + "...";
             }
             firstRow.add(subject + " [" + i + " " + day + "]");
         }
         for (int i = firstRowNumber; i < secondRowNumber; i++) {
             String subject = lessons.get(i).getSubject();
-            if (subject.length() > 50) {
-                subject = subject.substring(0, 45);
+            if (subject.length() > MAX_MESSAGE_LENGTH) {
+                subject = subject.substring(0, MAX_MESSAGE_LENGTH) + "...";
             }
             secondRow.add(subject + " [" + i + " " + day + "]");
         }

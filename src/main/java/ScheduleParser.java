@@ -28,7 +28,6 @@ public class ScheduleParser {
             }
 
             Multimap<String, Lesson> lessonByDayMultimap = ArrayListMultimap.create();
-
             List<String> daysList = new ArrayList<>();
 
             lessons.forEach(lesson -> {
@@ -48,8 +47,7 @@ public class ScheduleParser {
             }
             return new Schedule(groupSchedule);
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             return null;
         }
     }

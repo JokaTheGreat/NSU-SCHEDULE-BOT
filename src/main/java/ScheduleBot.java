@@ -21,8 +21,8 @@ public class ScheduleBot extends TelegramLongPollingBot {
     private static Collection<KeyboardRow> editingMenu;
 
     private static final String GROUP_NUMBER_FORMAT = "[1-2][0-9]{4}(\\.[1-4])?";
-    private static final String TOKEN = "";
-    private static final String USERNAME = "";
+    private static final String TOKEN = "5076105079:AAEpt9sWk4vuWG5-HUy7LAGbZnSAzYt1Kb0";
+    private static final String USERNAME = "@nsuScheduleTestBot";
 
     public ScheduleBot(DefaultBotOptions options) {
         super(options);
@@ -105,12 +105,12 @@ public class ScheduleBot extends TelegramLongPollingBot {
 
             if (userMessage.contains("/start")) {
                 sendKeyboardResponse(message,
-                                   """
-                                        Hello i'm nsu schedule test bot!
-                                        Please write your group number!
-                                                                                
-                                        If you want to completely change your group - write your group number again!
-                                        """
+                        """
+                                Hello i'm nsu schedule test bot!
+                                Please write your group number!
+                                                                        
+                                If you want to completely change your group - write your group number again!
+                                """
                         , mainMenu);
             }
             else if (userMessage.contains("Main Menu")) {
@@ -147,7 +147,7 @@ public class ScheduleBot extends TelegramLongPollingBot {
                 else {
                     String dayCode = getCodeByDay(userMessage);
                     String schedule = dataBase.getUserSchedule(chatId).getStringSchedule(dayCode);
-                    if (schedule != null) {
+                    if (!schedule.isEmpty()) {
                         sendTextResponse(message, schedule);
                     }
                     else {
@@ -160,16 +160,11 @@ public class ScheduleBot extends TelegramLongPollingBot {
                 if (groupNumber != null) {
                     int lessonIndex = getLessonIdFromEditingCallback(userMessage);
                     String dayCode = getDayCodeFromEditingCallback(userMessage);
-                    Lesson removedLesson = dataBase.getUserSchedule(chatId).getListSchedule(dayCode).remove(lessonIndex);
+                    dataBase.getUserSchedule(chatId).getListSchedule(dayCode).remove(lessonIndex);
 
-                    if (removedLesson != null) {
-                        List<Lesson> lessons = dataBase.getUserSchedule(chatId).getListSchedule(dayCode);
-                        var lessonsToDeleteList = Initializations.initLessonDeletingMenu(dayCode, lessons);
-                        sendKeyboardResponse(message, "Lesson deleted successfully!", lessonsToDeleteList);
-                    }
-                    else {
-                        sendKeyboardResponse(message, "You haven't lessons today.\nLucky!!", mainMenu);
-                    }
+                    List<Lesson> lessons = dataBase.getUserSchedule(chatId).getListSchedule(dayCode);
+                    var lessonsToDeleteList = Initializations.initLessonDeletingMenu(dayCode, lessons);
+                    sendKeyboardResponse(message, "Lesson deleted successfully!", lessonsToDeleteList);
                 }
                 else {
                     sendKeyboardResponse(message, "You didn't choose your group.\nPlease do it!", mainMenu);
@@ -177,8 +172,12 @@ public class ScheduleBot extends TelegramLongPollingBot {
             }
             else {
                 if (isGroupNumberValid(userMessage)) {
+                    String oldGroupNumber = dataBase.getGroupNumber(chatId);
                     Schedule schedule = ScheduleParser.parseGroupSchedule(userMessage);
-                    if (schedule != null) {
+                    if (oldGroupNumber.equals(userMessage)) {
+                        sendKeyboardResponse(message, "Group number is already set!", mainMenu);
+                    }
+                    else if (schedule != null) {
                         dataBase.addUser(chatId, userMessage, schedule);
                         sendKeyboardResponse(message, "Group number correct!\nNow you can choose the day!", mainMenu);
                     }
@@ -194,12 +193,13 @@ public class ScheduleBot extends TelegramLongPollingBot {
     }
 
     public static void main(String[] args) throws Exception {
-        dataBase = new DataBase();
+        dataBase = new DataBase("DATABASE.txt");
         mainMenu = Initializations.initMainMenu();
         editingMenu = Initializations.initEditingMenu();
 
         ScheduleBot bot = new ScheduleBot(new DefaultBotOptions());
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+
         telegramBotsApi.registerBot(bot);
     }
 }

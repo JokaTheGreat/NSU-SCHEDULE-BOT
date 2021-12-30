@@ -7,7 +7,6 @@ public class LessonParser {
     public static String parseLessonDay(String rRule) {
         int dayStartIndex = rRule.indexOf("BYDAY=") + "BYDAY=".length();
         int dayEndIndex = dayStartIndex + DAY_FORMAT_SIZE;
-
         return rRule.substring(dayStartIndex, dayEndIndex);
     }
 

@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class Schedule {
+public class Schedule implements Serializable {
     private static final String DASH = "========================================================";
 
     Map<String, List<Lesson>> schedule;
