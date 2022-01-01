@@ -1,53 +1,25 @@
+package Menu;
+
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class Initializations {
+import TGBotMain.Lesson;
+
+public class RemovingMenu implements Menu {
     private static final int MAX_MESSAGE_LENGTH = 50;
+    private final List<Lesson> lessons;
+    private final String day;
 
-    public static Collection<KeyboardRow> initMainMenu() {
-        List<KeyboardRow> daysList = new ArrayList<>();
-        KeyboardRow firstRow = new KeyboardRow();
-        KeyboardRow secondRow = new KeyboardRow();
-
-        firstRow.add("Monday");
-        firstRow.add("Tuesday");
-        firstRow.add("Wednesday");
-
-        secondRow.add("Thursday");
-        secondRow.add("Friday");
-        secondRow.add("Saturday");
-        secondRow.add("Edit");
-
-        daysList.add(firstRow);
-        daysList.add(secondRow);
-
-        return daysList;
+    public RemovingMenu(List<Lesson> lessons, String day) {
+        this.lessons = lessons;
+        this.day = day;
     }
 
-    public static Collection<KeyboardRow> initEditingMenu() {
-        List<KeyboardRow> daysListDel = new ArrayList<>();
-        KeyboardRow firstRow = new KeyboardRow();
-        KeyboardRow secondRow = new KeyboardRow();
-
-        firstRow.add("Edit Monday Lessons");
-        firstRow.add("Edit Tuesday Lessons");
-        firstRow.add("Edit Wednesday Lessons");
-        firstRow.add("Edit Thursday Lessons");
-
-        secondRow.add("Edit Friday Lessons");
-        secondRow.add("Edit Saturday Lessons");
-        secondRow.add("Main Menu");
-
-        daysListDel.add(firstRow);
-        daysListDel.add(secondRow);
-
-        return daysListDel;
-    }
-
-    public static Collection<KeyboardRow> initLessonDeletingMenu(String day, List<Lesson> lessons) {
+    @Override
+    public Collection<KeyboardRow> getMenu() {
         List<KeyboardRow> lessonsToDelete = new ArrayList<>();
         KeyboardRow firstRow = new KeyboardRow();
         KeyboardRow secondRow = new KeyboardRow();

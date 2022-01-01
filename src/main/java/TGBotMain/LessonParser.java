@@ -1,3 +1,5 @@
+package TGBotMain;
+
 import java.time.LocalTime;
 
 public class LessonParser {
